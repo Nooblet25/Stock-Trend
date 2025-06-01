@@ -1,0 +1,6 @@
+flask==3.0.2
+yfinance==0.2.36
+pandas==2.2.1
+numpy==1.26.4
+scikit-learn==1.4.1
+tensorflow==2.15.0 

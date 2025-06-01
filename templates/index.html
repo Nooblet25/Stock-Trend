@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stock Market Analyzer</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .fade-in {
+      opacity: 1;
+      transition: opacity 0.8s ease;
+    }
+
+    body {
+      background-color: #121212;
+      color: #fff;
+      min-height: 100vh;
+    }
+
+    .welcome-section {
+      background: linear-gradient(135deg, rgba(18, 18, 18, 0.95) 0%, rgba(30, 30, 30, 0.95) 100%);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-container img {
+      max-width: 200px;
+      height: auto;
+      filter: drop-shadow(0 0 10px rgba(0, 123, 255, 0.3));
+    }
+
+    .form-label, .form-control, .form-select {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-color: #444;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background-color: #2a2a2a;
+      border-color: #007bff;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+      color: #fff;
+    }
+
+    .form-control::placeholder {
+      color: #aaa;
+    }
+
+    .form-select option {
+      background-color: #1e1e1e;
+      color: #fff;
+    }
+
+    .form-text {
+      color: #fff !important;
+      opacity: 0.8;
+    }
+
+    .form-text ul {
+      list-style-type: none;
+      padding-left: 0.5rem;
+    }
+
+    .form-text ul li {
+      margin: 0.25rem 0;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      padding: 0.75rem 2rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+
+    canvas {
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-container {
+      margin-bottom: 2rem;
+      padding: 1rem;
+      background: rgba(30, 30, 30, 0.5);
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .time-selector .btn-link {
+      color: #fff;
+      text-decoration: none;
+      padding: 0.5rem 1rem;
+      margin: 0 0.25rem;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .time-selector .btn-link:hover {
+      background-color: rgba(0, 123, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .search-results {
+      max-height: 300px;
+      overflow-y: auto;
+      border-radius: 4px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-results .list-group-item {
+      transition: all 0.3s ease;
+    }
+
+    .search-results .list-group-item:hover {
+      background-color: #2a2a2a !important;
+      cursor: pointer;
+    }
+
+    .navbar {
+      background-color: rgba(18, 18, 18, 0.95) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-brand img {
+      filter: drop-shadow(0 0 5px rgba(0, 123, 255, 0.3));
+    }
+
+    .toast {
+      background: rgba(0, 123, 255, 0.9) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .bi-shuffle {
+      font-size: 1.2rem;
+    }
+
+    #toastContainer {
+      z-index: 1060;
+    }
+    
+    .toast {
+      background: rgba(0, 123, 255, 0.9) !important;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-bottom: 0.5rem;
+    }
+    
+    .toast.bg-danger {
+      background: rgba(220, 53, 69, 0.9) !important;
+    }
+
+    .company-suggestion {
+      transition: all 0.2s ease;
+      border: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .company-suggestion:hover {
+      background-color: #2a2a2a !important;
+      transform: translateX(5px);
+    }
+
+    .company-suggestion:last-child {
+      border-bottom: none;
+    }
+
+    #searchResults {
+      position: absolute;
+      width: 100%;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      margin-top: 0.5rem;
+      background-color: #1e1e1e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.35em 0.65em;
+    }
+
+    .toast.bg-success {
+      background: rgba(40, 167, 69, 0.9) !important;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      25% {
+        transform: translateY(-10px) rotate(2deg);
+      }
+      50% {
+        transform: translateY(0px) rotate(0deg);
+      }
+      75% {
+        transform: translateY(10px) rotate(-2deg);
+      }
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+    }
+
+    .logo-container img {
+      max-width: 200px;
+      height: auto;
+      filter: drop-shadow(0 0 10px rgba(0, 123, 255, 0.3));
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .prediction-summary {
+      background: rgba(30, 30, 30, 0.7);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .prediction-summary h4 {
+      color: #007bff;
+      margin-bottom: 1rem;
+    }
+
+    .metric-card {
+      background: rgba(40, 40, 40, 0.5);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .metric-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .metric-label {
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+
+    .trend-indicator {
+      font-size: 1.2rem;
+      margin-left: 0.5rem;
+    }
+
+    .trend-up {
+      color: #28a745;
+    }
+
+    .trend-down {
+      color: #dc3545;
+    }
+  </style>
+</head>
+<body class="bg-dark text-light">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-dark bg-dark px-4 fixed-top">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="/static/logo.svg" width="70" height="50" class="d-inline-block align-top me-2" alt="Logo">
+      <span class="text-white">StockTrendAI</span>
+    </a>
+  </nav>
+
+  <!-- Welcome Section -->
+  <section id="welcome" class="container mt-5 pt-5">
+    <div class="welcome-section text-center">
+      <div class="logo-container">
+        <img src="/static/logo.svg" alt="Logo" class="img-fluid">
+      </div>
+      <h1 class="mb-2">Welcome to StockTrendAI</h1>
+      <p class="lead mb-4">Analyze, Forecast, and Track Your Favorite Stocks Easily.</p>
+      <button id="getStartedBtn" class="btn btn-primary btn-lg" onclick="showStockSection()">Get Started</button>
+    </div>
+  </section>
+
+  <!-- Stock Section -->
+  <div id="stock-section" class="container py-4" style="display: none;">
+    <div class="row">
+      <div class="col-12">
+        <h4 class="mb-4 text-info">Stock Forecast Input</h4>
+        <form id="predictionForm" onsubmit="submitPredictionForm(event)">
+          <div class="mb-3">
+            <label for="ticker" class="form-label">Enter stock symbol</label>
+            <div class="input-group">
+              <input type="text" class="form-control" name="ticker" id="ticker" 
+                placeholder="Search by company name, ticker, or industry" required>
+              <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                <i class="bi bi-search"></i> Search
+              </button>
+            </div>
+            <div id="searchResults" class="list-group mt-2" style="position: absolute; z-index: 1000; width: 100%;"></div>
+            <small class="form-text text-light">Start typing to search for companies</small>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="start_year" class="form-label">Start Year for Training</label>
+              <input type="number" class="form-control" name="start_year" id="start_year" 
+                min="1980" max="2030" 
+                value="2010"
+                placeholder="e.g., 2010" required>
+              <small class="form-text text-muted">Historical data starts from 1980</small>
+            </div>
+            <div class="col-md-6">
+              <label for="end_year" class="form-label">End Year for Prediction</label>
+              <input type="number" class="form-control" name="end_year" id="end_year" 
+                min="1980" max="2050"
+                value="2025"
+                placeholder="e.g., 2025" required>
+              <small class="form-text text-muted">You can predict up to 2050</small>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="horizon" class="form-label">Days to Forecast</label>
+            <input type="number" class="form-control" name="horizon" id="horizon" 
+              min="1" max="1825"
+              value="365"
+              placeholder="e.g., 365 for one year" required>
+            <div class="form-text bg-dark p-3 rounded mt-2 border border-secondary">
+              <strong class="d-block mb-2">This is the number of days into the future you want to predict. For example:</strong>
+              <ul class="mt-1 mb-2">
+                <li>• 30 days = 1 month prediction</li>
+                <li>• 90 days = 3 months prediction</li>
+                <li>• 180 days = 6 months prediction</li>
+                <li>• 365 days = 1 year prediction</li>
+                <li>• 730 days = 2 years prediction</li>
+              </ul>
+              <strong class="d-block">Maximum 1825 days (5 years) per prediction</strong>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="model" class="form-label">Select Model</label>
+            <select class="form-select" name="model" id="model" required>
+              <option value="lstm">LSTM (Deep Learning)</option>
+              <option value="xgboost">XGBoost (Best for Short-term)</option>
+              <option value="rf">Random Forest (Balanced)</option>
+              <option value="arima">ARIMA (Time Series)</option>
+              <option value="linear">Linear Regression (Trend)</option>
+              <option value="logistic">Logistic (Classification)</option>
+            </select>
+            <small class="form-text text-muted">Different models have different strengths</small>
+          </div>
+          <div class="form-group">
+            <button type="submit" class="btn btn-primary" id="generateBtn">Generate Forecast</button>
+          </div>
+        </form>
+        <div id="predictionResult" class="alert alert-info mt-4 d-none" role="alert"></div>
+      </div>
+    </div>
+
+    <!-- Time Range Selector -->
+    <div class="container text-center mt-5">
+      <div class="btn-group time-selector" role="group">
+        <button type="button" class="btn btn-primary" onclick="selectRandomStock(event)">
+          <i class="bi bi-shuffle"></i> Try Random Stock
+        </button>
+      </div>
+    </div>
+
+    <!-- Stock Chart -->
+    <div class="container my-5">
+      <h5 class="text-center mb-4">Stock Market Forecast</h5>
+      <div class="chart-container" style="position: relative; height:60vh; width:100%;">
+        <canvas id="stockChart"></canvas>
+      </div>
+      <div class="text-center mt-3">
+        <button class="btn btn-outline-info btn-sm" onclick="resetStockZoom()">
+          <i class="bi bi-zoom-out"></i> Reset Zoom
+        </button>
+      </div>
+    </div>
+
+    <!-- Volume Chart -->
+    <div class="container mb-5">
+      <h5 class="text-center mb-4">Volume Traded Over Time</h5>
+      <div class="chart-container" style="position: relative; height:40vh; width:100%;">
+        <canvas id="volumeChart"></canvas>
+      </div>
+      <div class="text-center mt-3">
+        <button class="btn btn-outline-info btn-sm" onclick="resetVolumeZoom()">
+          <i class="bi bi-zoom-out"></i> Reset Zoom
+        </button>
+      </div>
+    </div>
+
+    <!-- Prediction Summary -->
+    <div class="container mb-5">
+      <div class="prediction-summary">
+        <h4><i class="bi bi-graph-up"></i> Prediction Summary</h4>
+        <div class="row">
+          <div class="col-md-6 col-lg-3 mb-3">
+            <div class="metric-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="metric-value" id="predictedPrice">--</div>
+                  <div class="metric-label">Predicted Price</div>
+                </div>
+                <span class="trend-indicator" id="priceIndicator"></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 mb-3">
+            <div class="metric-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="metric-value" id="confidenceScore">--</div>
+                  <div class="metric-label">Confidence Score</div>
+                </div>
+                <i class="bi bi-shield-check text-primary"></i>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 mb-3">
+            <div class="metric-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="metric-value" id="predictedChange">--</div>
+                  <div class="metric-label">Predicted Change</div>
+                </div>
+                <span class="trend-indicator" id="changeIndicator"></span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 mb-3">
+            <div class="metric-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <div class="metric-value" id="timeframe">--</div>
+                  <div class="metric-label">Prediction Timeframe</div>
+                </div>
+                <i class="bi bi-calendar-range text-info"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="metric-card">
+              <h5 class="text-primary mb-3">Key Insights</h5>
+              <div id="insights">
+                <p class="mb-2"><i class="bi bi-arrow-right-circle me-2"></i>Select a stock to view prediction insights</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Section -->
+  <script>
+    let abortController = null;
+
+    function showStockSection() {
+      const getStartedBtn = document.getElementById("getStartedBtn");
+      const stockSection = document.getElementById("stock-section");
+      
+      // Fade out only the button
+      getStartedBtn.classList.add("fade-out");
+      setTimeout(() => {
+        getStartedBtn.style.display = "none";
+        
+        // Show and fade in the stock section
+        stockSection.style.display = "block";
+        setTimeout(() => {
+          stockSection.classList.add("fade-in");
+          stockSection.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+      }, 800);
+    }
+
+    const stockCtx = document.getElementById('stockChart').getContext('2d');
+    const stockChart = new Chart(stockCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Historical Price',
+          data: [],
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.1,
+          pointRadius: 0,
+          order: 1
+        }, {
+          label: 'Predicted Price',
+          data: [],
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0.1,
+          pointRadius: 0,
+          order: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: { 
+            labels: { 
+              color: '#ccc',
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            titleFont: {
+              size: 16
+            },
+            bodyFont: {
+              size: 14
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              wheel: {
+                enabled: true,
+                modifierKey: 'ctrl',
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x',
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { 
+              color: '#ccc',
+              font: {
+                size: 12
+              }
+            },
+            grid: { color: '#333' }
+          },
+          y: {
+            ticks: { 
+              color: '#ccc',
+              font: {
+                size: 12
+              }
+            },
+            grid: { color: '#333' }
+          }
+        }
+      }
+    });
+
+    const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+    const volumeChart = new Chart(volumeCtx, {
+      type: 'bar',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Volume',
+          data: [],
+          backgroundColor: [],
+          order: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: { 
+            labels: { 
+              color: '#ccc',
+              font: {
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            titleFont: {
+              size: 16
+            },
+            bodyFont: {
+              size: 14
+            }
+          },
+          zoom: {
+            pan: {
+              enabled: true,
+              mode: 'x',
+              modifierKey: 'ctrl',
+            },
+            zoom: {
+              wheel: {
+                enabled: true,
+                modifierKey: 'ctrl',
+              },
+              pinch: {
+                enabled: true
+              },
+              mode: 'x',
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { 
+              color: '#ccc',
+              font: {
+                size: 12
+              }
+            },
+            grid: { color: '#333' }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: { 
+              color: '#ccc',
+              font: {
+                size: 12
+              }
+            },
+            grid: { color: '#333' },
+            title: {
+              display: true,
+              text: 'Volume',
+              color: '#ccc',
+              font: {
+                size: 14,
+                weight: 'bold'
+              }
+            }
+          }
+        }
+      }
+    });
+
+    async function submitPredictionForm(event) {
+      event.preventDefault();
+      document.getElementById('spinnerOverlay').classList.remove('d-none');
+      
+      // Create new AbortController for this request
+      abortController = new AbortController();
+
+      const ticker = document.getElementById('ticker').value;
+      const startYear = document.getElementById('start_year').value;
+      const endYear = document.getElementById('end_year').value;
+      const horizon = document.getElementById('horizon').value;
+      const model = document.getElementById('model').value;
+
+      // Validate years
+      if (parseInt(startYear) >= parseInt(endYear)) {
+        alert('End year must be greater than start year');
+        document.getElementById('spinnerOverlay').classList.add('d-none');
+        return;
+      }
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            ticker, 
+            start_year: startYear,
+            end_year: endYear, 
+            horizon, 
+            model 
+          }),
+          signal: abortController.signal
+        });
+
+        const result = await response.json();
+        document.getElementById('spinnerOverlay').classList.add('d-none');
+        abortController = null;
+
+        if (response.ok) {
+          displayPrediction(result);
+          // Format metrics based on type
+          let metricsHtml = '';
+          if (result.model_metrics) {
+            metricsHtml = `
+            <hr>
+            <h6>Model Performance Metrics:</h6>
+            ${result.model_metrics.metric_type === 'classification' ? `
+              <p><strong>Classification Accuracy:</strong> ${(result.model_metrics.accuracy * 100).toFixed(2)}%</p>
+              <p><strong>Classification Error Rate:</strong> ${(result.model_metrics.mean_error * 100).toFixed(2)}%</p>
+            ` : `
+              <p><strong>Prediction Accuracy:</strong> ${(result.model_metrics.accuracy * 100).toFixed(2)}%</p>
+              <p><strong>Mean Prediction Error:</strong> ${(result.model_metrics.mean_error * 100).toFixed(2)}%</p>
+              <p class="text-muted small">*For regression models, accuracy is based on how well the model fits the training data</p>
+            `}`;
+          }
+          
+          document.getElementById('modalBody').innerHTML = `
+            <p><strong>Ticker:</strong> ${ticker}</p>
+            <p><strong>Model:</strong> ${model.toUpperCase()}</p>
+            <p><strong>Training Period:</strong> ${startYear} - ${endYear}</p>
+            <p><strong>Forecast Horizon:</strong> ${horizon} days (${(horizon/365).toFixed(1)} years)</p>
+            <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+            ${metricsHtml}
+          `;
+          const modal = new bootstrap.Modal(document.getElementById('predictionModal'));
+          modal.show();
+        } else {
+          throw new Error(result.error || 'Something went wrong');
+        }
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.log('Prediction cancelled by user');
+        } else {
+          alert(error.message || 'Failed to fetch prediction.');
+        }
+        document.getElementById('spinnerOverlay').classList.add('d-none');
+        abortController = null;
+      }
+    }
+
+    function displayPrediction(data) {
+      if (!data || !data.dates || !data.predictions || !data.historical_prices) {
+        console.error('Invalid data format received:', data);
+        alert('Invalid data format received from server');
+        return;
+      }
+
+      // Clear previous data
+      stockChart.data.labels = [];
+      stockChart.data.datasets[0].data = [];
+      stockChart.data.datasets[1].data = [];
+      volumeChart.data.labels = [];
+      volumeChart.data.datasets[0].data = [];
+      volumeChart.data.backgroundColor = [];
+
+      try {
+        // Add historical data points
+        const historicalDates = data.dates.slice(0, -data.predictions.length) || [];
+        const historicalPrices = data.historical_prices || [];
+        const historicalVolumes = data.volumes || [];
+
+        // Add prediction data points
+        const predictionDates = data.dates.slice(-data.predictions.length) || [];
+        const predictions = data.predictions || [];
+
+        // Calculate predicted volumes based on price movement
+        const predictedVolumes = predictions.map((price, i) => {
+          if (!historicalVolumes.length) return 0;
+          
+          if (i === 0) {
+            const priceChange = price - (historicalPrices[historicalPrices.length - 1] || 0);
+            return Math.max(0, (historicalVolumes[historicalVolumes.length - 1] || 0) * (1 + priceChange / (price || 1)));
+          } else {
+            const priceChange = price - (predictions[i - 1] || 0);
+            return Math.max(0, (historicalVolumes[historicalVolumes.length - 1] || 0) * (1 + priceChange / (price || 1)));
+          }
+        });
+
+        // Update stock price chart
+        stockChart.data.labels = [...historicalDates, ...predictionDates];
+        stockChart.data.datasets[0].data = historicalPrices;
+        stockChart.data.datasets[1].data = Array(historicalDates.length).fill(null).concat(predictions);
+
+        // Update volume chart with both historical and predicted volumes
+        volumeChart.data.labels = [...historicalDates, ...predictionDates];
+        
+        // Create volume datasets for historical and predicted
+        volumeChart.data.datasets = [{
+          label: 'Historical Volume',
+          data: [...historicalVolumes, ...Array(predictionDates.length).fill(null)],
+          backgroundColor: historicalVolumes.map((v, i) => 
+            i > 0 && historicalPrices[i] > historicalPrices[i-1] 
+              ? 'rgba(40, 167, 69, 0.6)' // Green for price increase
+              : 'rgba(220, 53, 69, 0.6)' // Red for price decrease
+          ),
+          order: 1
+        }, {
+          label: 'Predicted Volume',
+          data: [...Array(historicalDates.length).fill(null), ...predictedVolumes],
+          backgroundColor: predictedVolumes.map((v, i) => {
+            const comparePrice = i === 0 ? (historicalPrices[historicalPrices.length - 1] || 0) : (predictions[i - 1] || 0);
+            return (predictions[i] || 0) > comparePrice 
+              ? 'rgba(40, 167, 69, 0.3)' // Lighter green for predicted increase
+              : 'rgba(220, 53, 69, 0.3)'; // Lighter red for predicted decrease
+          }),
+          borderWidth: 1,
+          borderColor: 'rgba(255, 255, 255, 0.2)',
+          order: 2
+        }];
+
+        // Update both charts
+        stockChart.update();
+        volumeChart.update();
+
+        // Update prediction summary
+        updatePredictionSummary(data);
+      } catch (error) {
+        console.error('Error displaying prediction:', error);
+        alert('Error displaying prediction data');
+      }
+    }
+
+    function updatePredictionSummary(data) {
+      // Update predicted price
+      const lastHistoricalPrice = data.historical_prices[data.historical_prices.length - 1];
+      const lastPredictedPrice = data.predictions[data.predictions.length - 1];
+      const priceChange = ((lastPredictedPrice - lastHistoricalPrice) / lastHistoricalPrice) * 100;
+      
+      document.getElementById('predictedPrice').textContent = `$${lastPredictedPrice.toFixed(2)}`;
+      document.getElementById('priceIndicator').innerHTML = priceChange >= 0 
+        ? `<i class="bi bi-arrow-up-circle-fill trend-up"></i>` 
+        : `<i class="bi bi-arrow-down-circle-fill trend-down"></i>`;
+      
+      // Update confidence score (example calculation)
+      const confidenceScore = Math.min(Math.abs(1 - data.model_metrics.mean_error) * 100, 100);
+      document.getElementById('confidenceScore').textContent = `${confidenceScore.toFixed(1)}%`;
+      
+      // Update predicted change
+      document.getElementById('predictedChange').textContent = `${Math.abs(priceChange).toFixed(1)}%`;
+      document.getElementById('changeIndicator').innerHTML = priceChange >= 0
+        ? `<i class="bi bi-arrow-up-circle-fill trend-up"></i>`
+        : `<i class="bi bi-arrow-down-circle-fill trend-down"></i>`;
+      
+      // Update timeframe
+      const days = data.predictions.length;
+      document.getElementById('timeframe').textContent = `${days} Days`;
+      
+      // Update insights
+      const insights = [];
+      if (priceChange >= 0) {
+        insights.push(`Stock shows an upward trend with a projected increase of ${priceChange.toFixed(1)}%`);
+      } else {
+        insights.push(`Stock shows a downward trend with a projected decrease of ${Math.abs(priceChange).toFixed(1)}%`);
+      }
+      
+      if (confidenceScore >= 80) {
+        insights.push('High confidence prediction based on historical patterns');
+      } else if (confidenceScore >= 60) {
+        insights.push('Moderate confidence in prediction accuracy');
+      } else {
+        insights.push('Exercise caution: lower confidence in prediction');
+      }
+      
+      // Add volatility insight
+      const prices = [...data.historical_prices, ...data.predictions];
+      const volatility = calculateVolatility(prices);
+      if (volatility > 0.02) {
+        insights.push('High market volatility detected - consider risk management strategies');
+      } else {
+        insights.push('Relatively stable market conditions observed');
+      }
+      
+      document.getElementById('insights').innerHTML = insights.map(insight => 
+        `<p class="mb-2"><i class="bi bi-arrow-right-circle me-2"></i>${insight}</p>`
+      ).join('');
+    }
+    
+    function calculateVolatility(prices) {
+      const returns = prices.slice(1).map((price, i) => 
+        (price - prices[i]) / prices[i]
+      );
+      const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+      const variance = returns.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / returns.length;
+      return Math.sqrt(variance);
+    }
+
+    // Company database for suggestions
+    const companies = [
+      { symbol: "AAPL", name: "Apple Inc.", industry: "Technology", country: "USA" },
+      { symbol: "MSFT", name: "Microsoft Corporation", industry: "Technology", country: "USA" },
+      { symbol: "GOOGL", name: "Alphabet Inc.", industry: "Technology", country: "USA" },
+      { symbol: "AMZN", name: "Amazon.com Inc.", industry: "E-commerce", country: "USA" },
+      { symbol: "NVDA", name: "NVIDIA Corporation", industry: "Technology", country: "USA" },
+      { symbol: "META", name: "Meta Platforms Inc.", industry: "Technology", country: "USA" },
+      { symbol: "TSLA", name: "Tesla Inc.", industry: "Automotive", country: "USA" },
+      { symbol: "JPM", name: "JPMorgan Chase & Co.", industry: "Finance", country: "USA" },
+      { symbol: "V", name: "Visa Inc.", industry: "Finance", country: "USA" },
+      { symbol: "WMT", name: "Walmart Inc.", industry: "Retail", country: "USA" },
+      { symbol: "KO", name: "The Coca-Cola Company", industry: "Beverages", country: "USA" },
+      { symbol: "DIS", name: "The Walt Disney Company", industry: "Entertainment", country: "USA" },
+      { symbol: "NFLX", name: "Netflix Inc.", industry: "Entertainment", country: "USA" },
+      { symbol: "ADBE", name: "Adobe Inc.", industry: "Technology", country: "USA" },
+      { symbol: "PYPL", name: "PayPal Holdings Inc.", industry: "Finance", country: "USA" },
+      { symbol: "INTC", name: "Intel Corporation", industry: "Technology", country: "USA" },
+      { symbol: "AMD", name: "Advanced Micro Devices Inc.", industry: "Technology", country: "USA" },
+      { symbol: "CRM", name: "Salesforce Inc.", industry: "Technology", country: "USA" },
+      { symbol: "BA", name: "Boeing Company", industry: "Aerospace", country: "USA" },
+      { symbol: "GE", name: "General Electric Company", industry: "Industrial", country: "USA" }
+    ];
+
+    let searchTimeout;
+    const searchInput = document.getElementById('ticker');
+    const searchResults = document.getElementById('searchResults');
+
+    searchInput.addEventListener('input', function(e) {
+      clearTimeout(searchTimeout);
+      const query = e.target.value.toLowerCase();
+      
+      if (query.length < 1) {
+        searchResults.innerHTML = '';
+        return;
+      }
+      
+      searchTimeout = setTimeout(() => {
+        // Filter companies based on query
+        const matches = companies.filter(company => 
+          company.symbol.toLowerCase().includes(query) ||
+          company.name.toLowerCase().includes(query) ||
+          company.industry.toLowerCase().includes(query)
+        );
+
+        if (matches.length > 0) {
+          searchResults.innerHTML = matches.slice(0, 5).map(company => `
+            <button type="button" 
+              class="list-group-item list-group-item-action bg-dark text-light company-suggestion"
+              data-symbol="${company.symbol}">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong class="text-primary">${company.symbol}</strong>
+                  <span class="ms-2">${company.name}</span>
+                </div>
+                <span class="badge bg-secondary">${company.industry}</span>
+              </div>
+              <small class="text-muted d-block">${company.country}</small>
+            </button>
+          `).join('');
+
+          // Add click handlers to suggestions
+          document.querySelectorAll('.company-suggestion').forEach(button => {
+            button.addEventListener('click', function() {
+              const symbol = this.dataset.symbol;
+              searchInput.value = symbol;
+              searchResults.innerHTML = '';
+              
+              // Show selection toast
+              const company = companies.find(c => c.symbol === symbol);
+              const toast = document.createElement('div');
+              toast.innerHTML = `
+                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                  <div class="d-flex">
+                    <div class="toast-body">
+                      <i class="bi bi-check-circle me-2"></i>
+                      Selected ${company.name} (${company.symbol})
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                  </div>
+                </div>
+              `;
+              
+              const toastContainer = document.getElementById('toastContainer') || (() => {
+                const container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'position-fixed bottom-0 end-0 p-3';
+                container.style.zIndex = '11';
+                document.body.appendChild(container);
+                return container;
+              })();
+              
+              toastContainer.appendChild(toast.firstElementChild);
+              const toastElement = new bootstrap.Toast(toast.firstElementChild, {
+                autohide: true,
+                delay: 3000
+              });
+              toastElement.show();
+            });
+          });
+        } else {
+          searchResults.innerHTML = `
+            <div class="list-group-item bg-dark text-light">
+              <i class="bi bi-search me-2"></i>
+              No matches found
+            </div>
+          `;
+        }
+      }, 300);
+    });
+
+    // Close search results when clicking outside
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#ticker') && !e.target.closest('#searchResults')) {
+        searchResults.innerHTML = '';
+      }
+    });
+
+    async function selectRandomStock(event) {
+      event.preventDefault();
+      
+      const popularStocks = [
+        { symbol: "AAPL", name: "Apple Inc." },
+        { symbol: "MSFT", name: "Microsoft Corporation" },
+        { symbol: "GOOGL", name: "Alphabet Inc." },
+        { symbol: "AMZN", name: "Amazon.com Inc." },
+        { symbol: "NVDA", name: "NVIDIA Corporation" },
+        { symbol: "META", name: "Meta Platforms Inc." },
+        { symbol: "TSLA", name: "Tesla Inc." },
+        { symbol: "JPM", name: "JPMorgan Chase & Co." },
+        { symbol: "V", name: "Visa Inc." },
+        { symbol: "WMT", name: "Walmart Inc." },
+        { symbol: "KO", name: "The Coca-Cola Company" },
+        { symbol: "DIS", name: "The Walt Disney Company" },
+        { symbol: "NFLX", name: "Netflix Inc." },
+        { symbol: "ADBE", name: "Adobe Inc." },
+        { symbol: "PYPL", name: "PayPal Holdings Inc." },
+        { symbol: "INTC", name: "Intel Corporation" },
+        { symbol: "AMD", name: "Advanced Micro Devices Inc." },
+        { symbol: "CRM", name: "Salesforce Inc." },
+        { symbol: "BA", name: "Boeing Company" },
+        { symbol: "GE", name: "General Electric Company" }
+      ];
+
+      // Select a random stock
+      const randomStock = popularStocks[Math.floor(Math.random() * popularStocks.length)];
+      
+      // Update the ticker input
+      document.getElementById('ticker').value = randomStock.symbol;
+      
+      // Show a toast notification
+      const toastContainer = document.getElementById('toastContainer') || (() => {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '11';
+        document.body.appendChild(container);
+        return container;
+      })();
+
+      const toast = document.createElement('div');
+      toast.innerHTML = `
+        <div class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="d-flex">
+            <div class="toast-body">
+              <i class="bi bi-info-circle me-2"></i>
+              Selected ${randomStock.name} (${randomStock.symbol})
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+        </div>
+      `;
+      toastContainer.appendChild(toast.firstElementChild);
+      
+      // Show the toast
+      const toastElement = new bootstrap.Toast(toast.firstElementChild, {
+        autohide: true,
+        delay: 3000
+      });
+      toastElement.show();
+      
+      // Automatically trigger form submission
+      const form = document.getElementById('predictionForm');
+      const formData = {
+        ticker: randomStock.symbol,
+        start_year: document.getElementById('start_year').value,
+        end_year: document.getElementById('end_year').value,
+        horizon: document.getElementById('horizon').value,
+        model: document.getElementById('model').value
+      };
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          displayPrediction(result);
+          // Format metrics based on type
+          let metricsHtml = '';
+          if (result.model_metrics) {
+            metricsHtml = `
+              <hr>
+              <h6>Model Performance Metrics:</h6>
+              ${result.model_metrics.metric_type === 'classification' ? `
+                <p><strong>Classification Accuracy:</strong> ${(result.model_metrics.accuracy * 100).toFixed(2)}%</p>
+                <p><strong>Classification Error Rate:</strong> ${(result.model_metrics.mean_error * 100).toFixed(2)}%</p>
+              ` : `
+                <p><strong>Prediction Accuracy:</strong> ${(result.model_metrics.accuracy * 100).toFixed(2)}%</p>
+                <p><strong>Mean Prediction Error:</strong> ${(result.model_metrics.mean_error * 100).toFixed(2)}%</p>
+                <p class="text-muted small">*For regression models, accuracy is based on how well the model fits the training data</p>
+              `}`;
+          }
+          
+          document.getElementById('modalBody').innerHTML = `
+            <p><strong>Ticker:</strong> ${randomStock.symbol}</p>
+            <p><strong>Company:</strong> ${randomStock.name}</p>
+            <p><strong>Model:</strong> ${formData.model.toUpperCase()}</p>
+            <p><strong>Training Period:</strong> ${formData.start_year} - ${formData.end_year}</p>
+            <p><strong>Forecast Horizon:</strong> ${formData.horizon} days (${(formData.horizon/365).toFixed(1)} years)</p>
+            <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+            ${metricsHtml}
+          `;
+          const modal = new bootstrap.Modal(document.getElementById('predictionModal'));
+          modal.show();
+        } else {
+          throw new Error(result.error || 'Failed to generate prediction');
+        }
+      } catch (error) {
+        // Show error toast
+        const errorToast = document.createElement('div');
+        errorToast.innerHTML = `
+          <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+              <div class="toast-body">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                ${error.message}
+              </div>
+              <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>
+        `;
+        toastContainer.appendChild(errorToast.firstElementChild);
+        const errorToastElement = new bootstrap.Toast(errorToast.firstElementChild, {
+          autohide: true,
+          delay: 5000
+        });
+        errorToastElement.show();
+      }
+    }
+
+    // Add event listeners
+    document.getElementById('predictionForm').addEventListener('submit', submitPredictionForm);
+
+    // Add this to your existing showError function or create it if it doesn't exist
+    function showError(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.getElementById('alerts').appendChild(alertDiv);
+    }
+
+    // Add this to your existing showSuccess function or create it if it doesn't exist
+    function showSuccess(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-success alert-dismissible fade show';
+      alertDiv.role = 'alert';
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      document.getElementById('alerts').appendChild(alertDiv);
+    }
+
+    // Add zoom reset functions
+    function resetStockZoom() {
+      stockChart.resetZoom();
+    }
+
+    function resetVolumeZoom() {
+      volumeChart.resetZoom();
+    }
+  </script>
+
+<!-- Bootstrap Modal for Prediction Summary -->
+<div class="modal fade" id="predictionModal" tabindex="-1" aria-labelledby="predictionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title" id="predictionModalLabel">Forecast Summary</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        Loading forecast...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Spinner Overlay -->
+<div id="spinnerOverlay" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="z-index: 1050; background-color: rgba(0,0,0,0.6);">
+  <div class="d-flex flex-column justify-content-center align-items-center h-100">
+    <div class="spinner-border text-info mb-3" style="width: 3rem; height: 3rem;" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <button id="cancelButton" class="btn btn-danger" onclick="cancelPrediction()">
+      <i class="bi bi-x-circle"></i> Cancel
+    </button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Enable Bootstrap tooltips
+  const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltipTriggerList.forEach(t => new bootstrap.Tooltip(t));
+
+  // Add event listener for modal hidden event
+  const predictionModal = document.getElementById('predictionModal');
+  predictionModal.addEventListener('hidden.bs.modal', function () {
+    // Remove modal backdrop if it exists
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) {
+      backdrop.remove();
+    }
+    // Remove modal-open class from body
+    document.body.classList.remove('modal-open');
+    // Remove inline styles from body
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+  });
+</script>
+
+</body>
+</html>

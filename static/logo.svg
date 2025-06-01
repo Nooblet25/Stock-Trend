@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="100" cy="100" r="90" fill="url(#gradient)" fill-opacity="0.1"/>
+  
+  <!-- Stock chart lines -->
+  <path d="M40 140 L70 100 L100 120 L130 60 L160 80" 
+        stroke="#007bff" 
+        stroke-width="4"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        fill="none">
+    <animate attributeName="stroke-dasharray" 
+             from="200 200" 
+             to="0 0" 
+             dur="2s" 
+             repeatCount="1"/>
+  </path>
+  
+  <!-- Prediction line (dashed) -->
+  <path d="M160 80 L180 40" 
+        stroke="#ff4081" 
+        stroke-width="4"
+        stroke-dasharray="8 4"
+        stroke-linecap="round"
+        fill="none">
+    <animate attributeName="stroke-dasharray" 
+             from="200 200" 
+             to="8 4" 
+             dur="2s" 
+             repeatCount="1"/>
+  </path>
+  
+  <!-- AI circuit pattern -->
+  <circle cx="70" cy="100" r="4" fill="#007bff"/>
+  <circle cx="100" cy="120" r="4" fill="#007bff"/>
+  <circle cx="130" cy="60" r="4" fill="#007bff"/>
+  <circle cx="160" cy="80" r="4" fill="#007bff"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0" y1="0" x2="200" y2="200">
+      <stop offset="0%" stop-color="#007bff"/>
+      <stop offset="100%" stop-color="#00ff88"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Animation for nodes -->
+  <g>
+    <animate attributeName="opacity"
+             values="0;1;0"
+             dur="2s"
+             repeatCount="indefinite"/>
+    <circle cx="70" cy="100" r="8" fill="#007bff" fill-opacity="0.3"/>
+    <circle cx="100" cy="120" r="8" fill="#007bff" fill-opacity="0.3"/>
+    <circle cx="130" cy="60" r="8" fill="#007bff" fill-opacity="0.3"/>
+    <circle cx="160" cy="80" r="8" fill="#007bff" fill-opacity="0.3"/>
+  </g>
+</svg> 
