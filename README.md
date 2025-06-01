@@ -1,4 +1,5 @@
-<<<<<<< HEAD
+#Geoup 4
+
 # Stock Market Analyzer
 
 A web application for analyzing and predicting stock market trends using historical data and statistical analysis.
@@ -78,9 +79,3 @@ http://localhost:5000
 
 This application is for educational purposes only. The predictions are based on historical data and simple statistical models. Do not use them for actual investment decisions.
 
-## License
-
-MIT License 
-=======
-# STOCKTREND-AI
->>>>>>> c18607ab5679936f2dab352a9208b910302a35b9
